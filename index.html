@@ -270,6 +270,67 @@
         // Atualiza a cada 30s para manter "tempo real" sem sobrecarregar a API
         setInterval(carregarCotacao, 30000);
     })();
+<!-- ===== Seção: Cotação do Dólar (USD → BRL) ===== -->
+<section id="cotacao-dolar" class="py-5" style="background:#0b0d17; color:#e5e7eb;">
+  <div class="container d-flex flex-column align-items-center justify-content-center" style="min-height:36vh;">
+    <h2 class="h5 mb-3" style="margin:0; color:#e5e7eb;">Cotação do Dólar (USD → BRL)</h2>
+
+    <div class="text-center" style="border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:20px 24px; width:min(720px,92%); background:#0f1322;">
+      <div class="d-flex align-items-center gap-2" style="font-size:12px; color:#9aa3b2;">
+        <span id="fx-status">Carregando…</span>
+        <span style="flex:1;"></span>
+        <span style="opacity:.75;">Atualizado</span>
+        <span id="fx-data" style="color:#e5e7eb;">—</span>
+      </div>
+
+      <div class="d-flex align-items-end justify-content-center gap-2 mt-2">
+        <span style="font-size:14px; color:#9aa3b2;">1 USD =</span>
+        <!-- Azul de destaque do tema -->
+        <span id="fx-valor" style="font-size:48px; line-height:1; font-weight:800; color:#00F6FF;">—</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  const API = "https://api.frankfurter.app/latest?from=USD&to=BRL";
+  const elValor  = document.getElementById("fx-valor");
+  const elData   = document.getElementById("fx-data");
+  const elStatus = document.getElementById("fx-status");
+
+  async function carregar() {
+    try {
+      elStatus.textContent = "Atualizando…";
+      const res = await fetch(API, { cache: "no-store" });
+      if (!res.ok) throw new Error("Falha na requisição");
+      const data = await res.json();
+
+      // { amount:1, base:"USD", date:"YYYY-MM-DD", rates:{ BRL: <número> } }
+      const brl = data && data.rates && data.rates.BRL;
+      if (typeof brl !== "number") throw new Error("Formato inesperado");
+
+      elValor.textContent = brl.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+      const apiDate = new Date(data.date + "T12:00:00Z");
+      const agora = new Date();
+      elData.textContent = apiDate.toLocaleDateString("pt-BR") + " • " + agora.toLocaleTimeString("pt-BR");
+
+      elStatus.textContent = "Online";
+      elStatus.style.color = "#22c55e"; // verde discreto
+    } catch (e) {
+      console.error(e);
+      elStatus.textContent = "Erro ao atualizar. Tentando novamente em 60s…";
+      elStatus.style.color = "#ef4444"; // vermelho discreto
+    }
+  }
+
+  carregar();
+  setInterval(carregar, 60 * 1000);
+})();
+</script>
+
+        
     </script>
 </body>
 
