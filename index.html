@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
     <meta charset="utf-8">
@@ -21,7 +21,7 @@
     <!-- barra de navegacao -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#"><img src="./assets/logo.svg"></a>
+            <a class="navbar-brand" href="#"><img src="./assets/logo.svg" alt="HooBank"></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                 aria-label="Toggle navigation">
@@ -48,6 +48,27 @@
         </div>
     </nav>
 
+    <!-- COTAÇÃO DO DÓLAR (USD -> BRL) -->
+    <section id="cotacao-usd" class="cotacao py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 d-flex justify-content-center">
+                    <div class="cotacao-card fundo text-center py-4 px-5 w-100" style="max-width:720px;">
+                        <div class="mb-1 text-uppercase small" style="letter-spacing: .08em; opacity: .85;">
+                            Cotação do Dólar <span class="d-none d-sm-inline">(USD → BRL)</span>
+                        </div>
+                        <div class="display-5 destaque">
+                            <span class="textoespecial" id="valor-usd">--</span>
+                        </div>
+                        <div class="mt-1">
+                            <span id="data-cotacao" class="small" style="opacity:.75;">&nbsp;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- area de destaque -->
     <div class="container">
         <div class="row">
@@ -56,8 +77,7 @@
                 <p class="mt-3">Nossos produtos vão atender 100% das suas demandas de pagamentos e recebimentos de valores</p>
             </div>
             <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6">
-                <img src="./assets/robot.png" width="100%">
-                
+                <img src="./assets/robot.png" width="100%" alt="Robô HooBank">
             </div>
         </div>
     </div>
@@ -133,7 +153,7 @@
                     <i class="fa-solid fa-quote-left fa-3x"></i>
                     <p>Nunca experimentei uma solução tão inovadora como a HooBank</p>
                     <div class="bio">
-                        <img src="./assets/people01.png" class="px-3">
+                        <img src="./assets/people01.png" class="px-3" alt="Cliente 1">
                         <div>
                             <h4>Helena Huang</h4>
                             <p>Head de Produto</p>
@@ -147,7 +167,7 @@
                     <i class="fa-solid fa-quote-left fa-3x"></i>
                     <p>A integração mais simples e rápida que fizemos com nosso produto</p>
                     <div class="bio">
-                        <img src="./assets/people02.png" class="px-3">
+                        <img src="./assets/people02.png" class="px-3" alt="Cliente 2">
                         <div>
                             <h4>James Johnson</h4>
                             <p>Head de Tecnologia</p>
@@ -161,7 +181,7 @@
                     <i class="fa-solid fa-quote-left fa-3x"></i>
                     <p>A facilidade e agilidade nos permite ter um giro de capital melhor</p>
                     <div class="bio">
-                        <img src="./assets/people03.png" class="px-3">
+                        <img src="./assets/people03.png" class="px-3" alt="Cliente 3">
                         <div>
                             <h4>Rober Red</h4>
                             <p>Head de Finanças</p>
@@ -189,7 +209,7 @@
     <div class="container">
         <div class="row">
             <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 col-xxl-3">
-                <img src="./assets/logo.svg" width="80%">
+                <img src="./assets/logo.svg" width="80%" alt="Logo HooBank">
             </div>
             <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 col-xxl-3">
                 <p class="destaque">Explore</p>
@@ -215,34 +235,42 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
-        crossorigin="anonymous"></script> 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <!-- aqui está a barra de navegação -->
-</nav>
+        crossorigin="anonymous"></script>
+    <script>
+    (function(){
+        const elValor = document.getElementById('valor-usd');
+        const elData = document.getElementById('data-cotacao');
+        const URL = 'https://api.frankfurter.app/latest?from=USD&to=BRL';
 
-<!-- ===== Seção: Cotação do Dólar (USD → BRL) ===== -->
-<section id="cotacao-dolar" class="py-4" style="background:#0b0d17; color:#e5e7eb;">
-  <div class="container d-flex flex-column align-items-center justify-content-center" style="min-height:20vh;">
-    <h2 class="h6 mb-2" style="margin:0; color:#e5e7eb;">Cotação do Dólar (USD → BRL)</h2>
+        async function carregarCotacao(){
+            try{
+                const resp = await fetch(URL, { cache: 'no-store' });
+                if(!resp.ok) throw new Error('HTTP ' + resp.status);
+                const json = await resp.json();
+                const brl = json && json.rates && typeof json.rates.BRL === 'number' ? json.rates.BRL : null;
+                if(brl !== null){
+                    elValor.textContent = brl.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                } else {
+                    elValor.textContent = 'Indisponível';
+                }
+                if(json && json.date){
+                    const dt = new Date(json.date + 'T00:00:00');
+                    elData.textContent = 'Atualizado em ' + dt.toLocaleDateString('pt-BR');
+                } else {
+                    elData.textContent = '';
+                }
+            } catch (e){
+                elValor.textContent = 'Erro ao carregar';
+                elData.textContent = '';
+                // opcional: tentar novamente em próximo ciclo
+            }
+        }
 
-    <div class="text-center" style="border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:16px 20px; width:min(480px,92%); background:#0f1322;">
-      <div class="d-flex align-items-center gap-2" style="font-size:12px; color:#9aa3b2;">
-        <span id="fx-status">Carregando…</span>
-        <span style="flex:1;"></span>
-        <span style="opacity:.75;">Atualizado</span>
-        <span id="fx-data" style="color:#e5e7eb;">—</span>
-      </div>
-
-      <div class="d-flex align-items-end justify-content-center gap-2 mt-2">
-        <span style="font-size:14px; color:#9aa3b2;">1 USD =</span>
-        <span id="fx-valor" style="font-size:40px; line-height:1; font-weight:800; color:#00F6FF;">—</span>
-      </div>
-    </div>
-  </div>
-</section>
- 
-</script>
-
+        carregarCotacao();
+        // Atualiza a cada 30s para manter "tempo real" sem sobrecarregar a API
+        setInterval(carregarCotacao, 30000);
+    })();
+    </script>
 </body>
 
 </html>
